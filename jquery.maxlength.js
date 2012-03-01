@@ -1,7 +1,7 @@
 ;
 /**
  * jQuery MaxLength Plugin
- * Version: 0.1
+ * Version: 0.2
  * Author: Steven Mathias
  * Description:
  * 	This plugin will create a pop-up notification of how many characters
