@@ -317,6 +317,11 @@
 				return false;
 			}
 			
+			if (!$.maxLengthDisplay.allowPositionToggle === true) {
+				// We have disallowed toggling locations for these elements.
+				return;
+			}
+			
 			switch (parentPin[0]) {
 				case "top":
 					switch (targetPin[0]) {
