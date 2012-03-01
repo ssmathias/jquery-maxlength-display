@@ -19,11 +19,11 @@
 			"parent": "top-right"
 		},
 		"allowPositionToggle": true,
-		"style": {},
+		"style": {"background-color": "red"},
 		"lengthDefinition" : {
 			"long": 100,
 			"medium": 50,
-			"short": 10,
+			"short": 1,
 			"empty": 0
 		},
 
@@ -64,9 +64,10 @@
 			else {
 				return false;
 			}
-		}
+		},
 		
 		"updateDisplayMarkup": function($parent, $target) {
+			$target = $($target);
 			if (typeof $target.attr == "undefined") {
 				// Convert to jQuery object
 				$target = $($target);
@@ -83,7 +84,9 @@
 			}
 				
 			// Clean off old length classes.
-			$target.className = $target.className.replace(/\bmaxlength-remaining-.*?\b/g, '');
+			if ($target.className) {
+				$target.className = $target.className.replace(/\bmaxlength-remaining-.*?\b/g, '');
+			}
 			
 			for (var lengthName in $.maxLengthDisplay.lengthDefinition) {
 				var currentLength = $.maxLengthDisplay.lengthDefinition[lengthName];
@@ -92,9 +95,10 @@
 					currentMaxClassNum = currentLength;
 				}
 			}
+			
 			$target.addClass(cssClass)
 				.html(remainingChars);
-		}
+		},
 			
 		
 		"initializeElement": function($element) {
@@ -119,7 +123,8 @@
 			
 			if (!$element.data("maxlength-display-target")) {
 				// A display target needs to be created for this element.
-				$target = $.maxLengthDisplay.createDisplayTarget($this);
+				$target = $.maxLengthDisplay.createDisplayTarget($element);
+				console.log($target);
 			}
 			else {
 				$target = $("#"+$element.data("maxlength-display-target"));
@@ -133,15 +138,15 @@
 			}
 			
 			// Set up the change events for this element.
-			$this
+			$element
 				.bind('keyup change', function() {
-					$.maxLengthDisplay.updateDisplayMarkup($this, $target);
+					$.maxLengthDisplay.updateDisplayMarkup($element, $target);
 				})
 				.bind('keypress', function(e) {
-					var currentLength = $this.val().length;
-					if (currentLength + 1 >= maxLength) {
+					var currentLength = $element.val().length;
+					if (currentLength + 1 > maxLength) {
 						// Prevent entry of the content
-						$this.val($this.val().substring(0, maxLength);
+						$element.val($element.val().substring(0, maxLength));
 						e.stopPropagation();
 						e.preventDefault();
 					}
@@ -173,13 +178,13 @@
 			
 			if (typeof pinLocation == "undefined") {
 				pinLocation = defaultPinLocation;
-				if (!$.inArray(pinLocation[0], ["top", "bottom"])) {
+				if (!$.inArray(pinLocation[0], ["top", "bottom"]) == -1) {
 					if (typeof console != "undefined") {
 						console.warn("[jQuery Maxlength Display] Invalid vertical pin location: " + pinLocation[0] + " - Overriding to " + overridePinLocation[0]);
 					}
 					pinLocation[0] = overridePinLocation[0];
 				}
-				if (!$.inArray(pinLocation[1], ["left", "right"])) {
+				if (!$.inArray(pinLocation[1], ["left", "right"]) == -1) {
 					if (typeof console != "undefined") {
 						console.warn("[jQuery Maxlength Display] Invalid horizontal pin location: " + pinLocation[1] + " - Overriding to " + overridePinLocation[1]);
 					}
@@ -195,7 +200,7 @@
 					pinLocation = defaultPinLocation;
 				}
 				else {
-					if (!$.inArray(pinLocation[0], ["top", "bottom"])) {
+					if (!$.inArray(pinLocation[0], ["top", "bottom"]) == -1) {
 						if ($.inArray(defaultPinLocation[0], ["top", "bottom"])) {
 							if (typeof console != "undefined") {
 								console.warn("[jQuery Maxlength Display] Invalid vertical pin location: " + pinLocation[0] + " - Using default.");
@@ -209,7 +214,7 @@
 							pinLocation[0] = overridePinLocation[0];
 						}
 					}
-					if (!$.inArray(pinLocation[1], ["left", "right"])) {
+					if (!$.inArray(pinLocation[1], ["left", "right"]) == -1) {
 						if ($.inArray(defaultPinLocation[1], ["left", "right"])) {
 							if (typeof console != "undefined") {
 								console.warn("[jQuery Maxlength Display] Invalid horizontal pin location: " + pinLocation[1] + " - Using default.");
@@ -227,7 +232,7 @@
 			}
 			
 			return pinLocation;
-		}
+		},
 		
 		"createDisplayTarget": function($parent) {
 			var $parentDiv = $('<div></div>'),
@@ -248,10 +253,7 @@
 			// Configure the inner div. This is largely the "target", and what is returned.
 			$.maxLengthDisplay.updateDisplayMarkup($parent, $innerDiv);
 			$innerDiv
-				.addClass('maxlength-display-target')
-				.css(targetStyle)
-				.width($innerDiv.width())
-				.hide();
+				.addClass('maxlength-display-target');
 				
 			// Configure the parent div
 			$parentDiv
@@ -260,12 +262,13 @@
 					"float": "left"
 				})
 				.append($innerDiv)
-				.hide()
 				.data("maxlength-parent-pin", $.maxLengthDisplay.getPinDefinition($parent, "parent"))
 				.data("maxlength-my-pin", $.maxLengthDisplay.getPinDefinition($parent, "target"));
 			
 			// Append to the body so it can flow outside its parents' DOM location.
 			$('body').append($parentDiv);
+			$innerDiv.width($innerDiv.width());
+			$parentDiv.hide();
 			$.maxLengthDisplay.updateDisplayLocation($parent, $parentDiv);
 				
 			// Set up events related to these elements
