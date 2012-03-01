@@ -8,6 +8,9 @@
  * 	are left before maxlength is reached. It will also update browsers
  *	which do not support max length on textareas to restrict the length
  *	of those fields.
+ * Notes:
+ *	This plugin requires the JSON global object to exist. In older browsers, json2.js should be
+ *	used as a dependency.
  **/
 
 (function($) {
@@ -77,7 +80,29 @@
 			}
 			var remainingChars = $.maxLengthDisplay.calculateRemainingChars($parent),
 				cssClass = "",
-				currentMaxClassNum = -1;
+				currentMaxClassNum = -1,
+				lengthClasses = {};
+				
+			// Method to clone object that is supported in older browsers.
+			for (var lengthClass in $.maxLengthDisplay.lengthDefinition) {
+				lengthClasses[lengthClass] = $.maxLengthDisplay.lengthDefinition[lengthClass];
+			}
+			
+			// Allow overrides of lengthClasses and definitions
+			if ($parent.data('maxlength-length-classes')) {
+				var overrideClasses = $.maxLengthDisplay.objectifyCssString($parent.data('maxlength-length-classes'));
+				
+				for (var className in overrideClasses) {
+					var lengthVal = parseInt(overrideClasses[className]);
+					if (typeof lengthVal == "undefined" || typeof lengthVal == "NaN") {
+						if (typeof console != "undefined") {
+							console.warn('[jQuery Maxlength Display] - Override length class "'+className+'" value "'+overrideClasses[className]+'" could not be parsed as an integer. Ignoring');
+						}
+						continue;
+					}
+					lengthClasses[className] = lengthVal;
+				}
+			}
 				
 			if (remainingChars === false) {
 				return false;
@@ -88,7 +113,7 @@
 				$target.className = $target.className.replace(/\bmaxlength-remaining-.*?\b/g, '');
 			}
 			
-			for (var lengthName in $.maxLengthDisplay.lengthDefinition) {
+			for (var lengthName in lengthClasses) {
 				var currentLength = $.maxLengthDisplay.lengthDefinition[lengthName];
 				if (remainingChars >= currentLength && currentLength > currentMaxClassNum) {
 					cssClass = "maxlength-remaining-" + lengthName;
@@ -237,7 +262,12 @@
 		"createDisplayTarget": function($parent) {
 			var $parentDiv = $('<div></div>'),
 				$innerDiv = $('<div></div>'),
-				targetStyle = $.maxLengthDisplay.style;
+				targetStyle = {};
+				
+			// Cheap object cloning supported in older browsers
+			for (var styleName in $.maxLengthDisplay.style) {
+				targetStyle[styleName] = $.maxLengthDisplay.style[styleName];
+			}
 				
 			if ($parent.data("maxlength-target-style")) {
 				overrideStyle = $.maxLengthDisplay.objectifyCssString($parent.data("maxlength-target-style"));
@@ -281,9 +311,9 @@
 				})
 				.blur(function() {
 					$innerDiv
-						.addClass("maxlength-parent-has-focus");
+						.removeClass("maxlength-parent-has-focus");
 					$parentDiv
-						.addClass("maxlength-parent-has-focus")
+						.removeClass("maxlength-parent-has-focus")
 						.hide();
 				});
 
