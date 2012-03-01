@@ -1,7 +1,7 @@
 ;
 /**
  * jQuery MaxLength Plugin
- * Version: 0.2.3
+ * Version: 0.3
  * Author: Steven Mathias
  * Description:
  * 	This plugin will create a pop-up notification of how many characters
@@ -149,7 +149,6 @@
 			if (!$element.data("maxlength-display-target")) {
 				// A display target needs to be created for this element.
 				$target = $.maxLengthDisplay.createDisplayTarget($element);
-				console.log($target);
 			}
 			else {
 				$target = $("#"+$element.data("maxlength-display-target"));
@@ -262,7 +261,9 @@
 		"createDisplayTarget": function($parent) {
 			var $parentDiv = $('<div></div>'),
 				$innerDiv = $('<div></div>'),
-				targetStyle = {};
+				targetStyle = {},
+				allowToggle = $.maxLengthDisplay.allowPositionToggle,
+				overrideToggle = $parent.data('maxlength-allow-position-toggle');
 				
 			// Cheap object cloning supported in older browsers
 			for (var styleName in $.maxLengthDisplay.style) {
@@ -282,6 +283,21 @@
 			$innerDiv
 				.addClass('maxlength-display-target');
 				
+			if (typeof overrideToggle != "undefined") {
+				var overrideToggle = $parent.data('maxlength-allow-position-toggle');
+				if (overrideToggle.length > 0) {
+					overrideToggle = $.trim(overrideToggle.toLowerCase());
+				}
+				if ($.inArray(overrideToggle, ["true", "false"])) {
+					allowToggle = (overrideToggle == "true");
+				}
+				else {
+					if (typeof console != "undefined") {
+						console.warn('[jQuery Maxlength Display] allow position toggle value "' + overrideToggle + '" not recognized. Ignoring override.');
+					}
+				}
+			}
+				
 			// Configure the parent div
 			$parentDiv
 				.addClass('maxlength-display-target-parent')
@@ -290,7 +306,9 @@
 				})
 				.append($innerDiv)
 				.data("maxlength-parent-pin", $.maxLengthDisplay.getPinDefinition($parent, "parent"))
-				.data("maxlength-my-pin", $.maxLengthDisplay.getPinDefinition($parent, "target"));
+				.data("maxlength-my-pin", $.maxLengthDisplay.getPinDefinition($parent, "target"))
+				.data("maxlength-can-toggle", allowToggle)
+				.data("parent-id", $parent.attr('id'));
 			
 			// Append to the body so it can flow outside its parents' DOM location.
 			$('body').append($parentDiv);
@@ -330,6 +348,10 @@
 			var parentPin = $target.data("maxlength-parent-pin"),
 				targetPin = $target.data("maxlength-my-pin"),
 				positionCss = {"position": "absolute", "top": "", "left": ""},
+				canToggle = (
+					($target.data('maxlength-can-toggle') !== undefined && $target.data('maxlength-can-toggle') === true) ||
+					($target.data('maxlength-can-toggle') === undefined && $.maxLengthDisplay.allowPositionToggle === true)
+				),
 				parentPos = $parent.position(),
 				windowPos = {}; // windowPos has to be created manually
 				
@@ -346,16 +368,11 @@
 				return false;
 			}
 			
-			if (!$.maxLengthDisplay.allowPositionToggle === true) {
-				// We have disallowed toggling locations for these elements.
-				return;
-			}
-			
 			switch (parentPin[0]) {
 				case "top":
 					switch (targetPin[0]) {
 						case "top":
-							if (parentPos.top < windowPos.top && parentPos.bottom > windowPos.top && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.top < windowPos.top && parentPos.bottom > windowPos.top && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -383,7 +400,7 @@
 							}
 							break;
 						case "bottom":
-							if (parentPos.top - $target.outerHeight() < windowPos.top && parentPos.bottom > windowPos.top && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.top - $target.outerHeight() < windowPos.top && parentPos.bottom > windowPos.top && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -415,7 +432,7 @@
 				case "bottom":
 					switch (targetPin[0]) {
 						case "top":
-							if (parentPos.bottom + $target.outerHeight() > windowPos.bottom && parentPos.top < windowPos.bottom && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.bottom + $target.outerHeight() > windowPos.bottom && parentPos.top < windowPos.bottom && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -443,7 +460,7 @@
 							}
 							break;
 						case "bottom":
-							if (parentPos.bottom > windowPos.bottom && parentPos.top < windowPos.bottom && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.bottom > windowPos.bottom && parentPos.top < windowPos.bottom && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -478,7 +495,7 @@
 				case "left":
 					switch (targetPin[1]) {
 						case "left":
-							if (parentPos.left < windowPos.left && parentPos.right > windowPos.left && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.left < windowPos.left && parentPos.right > windowPos.left && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -506,7 +523,7 @@
 							}
 							break;
 						case "right":
-							if (parentPos.left - $target.outerWidth() < windowPos.left && parentPos.right > windowPos.left && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.left - $target.outerWidth() < windowPos.left && parentPos.right > windowPos.left && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -538,7 +555,7 @@
 				case "right":
 					switch (targetPin[1]) {
 						case "left":
-							if (parentPos.right + $target.outerWidth() > windowPos.right && parentPos.left < windowPos.right && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.right + $target.outerWidth() > windowPos.right && parentPos.left < windowPos.right && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
@@ -566,7 +583,7 @@
 							}
 							break;
 						case "right":
-							if (parentPos.right > windowPos.right && parentPos.left < windowPos.right && $.maxLengthDisplay.allowPositionToggle) {
+							if (parentPos.right > windowPos.right && parentPos.left < windowPos.right && canToggle) {
 								// Set toggled state
 								if ($target.hasClass("maxlength-display-target-parent")) {
 									$target.find("maxlength-display-target").each(function() {
