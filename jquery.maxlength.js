@@ -240,13 +240,10 @@
 				targetStyle = $.maxLengthDisplay.style;
 				
 			if ($parent.data("maxlength-target-style")) {
-				// Parse the CSS into a custom object.
-				var inlineStyles = $.trim($parent.data("maxlength-target-style")).split(';');
-				for (var styleDefinition in inlineStyles) {
-					var currentDefinition = $.trim(inlineStyles[styleDefinition]).split(':');
-					if (currentDefinition.length == 2) {
-						targetStyle[$.trim(currentDefinition[0])] = $.trim(currentDefinition[1]);
-					}
+				overrideStyle = $.maxLengthDisplay.objectifyCssString($parent.data("maxlength-target-style"));
+				
+				for (var attName in overrideStyle) {
+					targetStyle[attName] = overrideStyle[attName];
 				}
 			}
 				
@@ -269,7 +266,7 @@
 			$('body').append($parentDiv);
 			$innerDiv
 				.width($innerDiv.width())
-				.css($.maxLengthDisplay.style);
+				.css(targetStyle);
 			$parentDiv.hide();
 			$.maxLengthDisplay.updateDisplayLocation($parent, $parentDiv);
 				
@@ -643,6 +640,20 @@
 						break;
 				}
 			}
+		},
+		
+		"objectifyCssString": function(attString) {
+			var cssObject = {},
+				rules = attString.split(';');
+				
+			for (var index in rules) {
+				var rule = $.trim(rules[index]).split(':');
+				if (rule.length == 2) {
+					cssObject[$.trim(rule[0])] = $.trim(rule[1]);
+				}
+			}
+			
+			return cssObject;
 		}
 	};
 	$(document).ready(function() { $.maxLengthDisplay.init(); });
