@@ -19,7 +19,7 @@
 			"parent": "top-right"
 		},
 		"allowPositionToggle": true,
-		"style": {"background-color": "red"},
+		"style": {},
 		"lengthDefinition" : {
 			"long": 100,
 			"medium": 50,
