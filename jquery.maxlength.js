@@ -267,7 +267,9 @@
 			
 			// Append to the body so it can flow outside its parents' DOM location.
 			$('body').append($parentDiv);
-			$innerDiv.width($innerDiv.width());
+			$innerDiv
+				.width($innerDiv.width())
+				.css($.maxLengthDisplay.style);
 			$parentDiv.hide();
 			$.maxLengthDisplay.updateDisplayLocation($parent, $parentDiv);
 				
