@@ -1,7 +1,7 @@
 ;
 /**
  * jQuery MaxLength Plugin
- * Version: 0.3
+ * Version: 0.3.1
  * Author: Steven Mathias
  * Description:
  * 	This plugin will create a pop-up notification of how many characters
@@ -352,7 +352,7 @@
 					($target.data('maxlength-can-toggle') !== undefined && $target.data('maxlength-can-toggle') === true) ||
 					($target.data('maxlength-can-toggle') === undefined && $.maxLengthDisplay.allowPositionToggle === true)
 				),
-				parentPos = $parent.position(),
+				parentPos = $parent.offset(),
 				windowPos = {}; // windowPos has to be created manually
 				
 			// Set up missing position elements
