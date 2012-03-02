@@ -14,7 +14,7 @@
  * Copyright and Licensing:
  *	Copyright (c) 2012 Steven Mathias
  *	Licensed for use under either the GNU Public License or the MIT License
- *	Copies of licenses are available for review at either:
+ *	Copies of licenses are distributed with source and most recent versions available for review at either:
  *		GPL - https://github.com/ssmathias/jquery-maxlength-display/blob/master/GPL-License.txt
  *		MIT - https://github.com/ssmathias/jquery-maxlength-display/blob/master/MIT-License.txt
  **/
