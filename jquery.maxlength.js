@@ -76,51 +76,29 @@
 		},
 		
 		"updateDisplayMarkup": function($parent, $target) {
-			$target = $($target);
-			if (typeof $target.attr == "undefined") {
-				// Convert to jQuery object
-				$target = $($target);
-			}
-			if (typeof $target == "undefined") {
-				return false;
-			}
 			var remainingChars = $.maxLengthDisplay.calculateRemainingChars($parent),
 				cssClass = "",
 				currentMaxClassNum = -1,
-				lengthClasses = {};
-				
-			// Method to clone object that is supported in older browsers.
-			for (var lengthClass in $.maxLengthDisplay.lengthDefinition) {
-				lengthClasses[lengthClass] = $.maxLengthDisplay.lengthDefinition[lengthClass];
-			}
+				lengthClasses;
 			
-			// Allow overrides of lengthClasses and definitions
-			if ($parent.data('maxlength-length-classes')) {
-				var overrideClasses = $.maxLengthDisplay.objectifyCssString($parent.data('maxlength-length-classes'));
-				
-				for (var className in overrideClasses) {
-					var lengthVal = parseInt(overrideClasses[className]);
-					if (typeof lengthVal == "undefined" || typeof lengthVal == "NaN") {
-						if (typeof console != "undefined") {
-							console.warn('[jQuery Maxlength Display] - Override length class "'+className+'" value "'+overrideClasses[className]+'" could not be parsed as an integer. Ignoring');
-						}
-						continue;
-					}
-					lengthClasses[className] = lengthVal;
-				}
+			$target = $($target);
+			if (typeof $target == "undefined") {
+				return false;
 			}
 				
 			if (remainingChars === false) {
 				return false;
 			}
+			
+			lengthClasses = $target.data('maxlength-length-classes');
 				
 			// Clean off old length classes.
-			if ($target.className) {
-				$target.className = $target.className.replace(/\bmaxlength-remaining-.*?\b/g, '');
+			if ($target.attr('class')) {
+				$target.attr('class', $target.attr('class').replace(/\s?maxlength-remaining-[\S]*\s?/g, ''));
 			}
 			
 			for (var lengthName in lengthClasses) {
-				var currentLength = $.maxLengthDisplay.lengthDefinition[lengthName];
+				var currentLength = lengthClasses[lengthName];
 				if (remainingChars >= currentLength && currentLength > currentMaxClassNum) {
 					cssClass = "maxlength-remaining-" + lengthName;
 					currentMaxClassNum = currentLength;
@@ -165,6 +143,7 @@
 					.blur(function() {
 						$target.removeClass('maxlength-parent-has-focus');
 					});
+				$.maxLengthDisplay.setLengthDefinitionData($element, $target);
 			}
 			
 			// Set up the change events for this element.
@@ -285,6 +264,7 @@
 			}
 				
 			// Configure the inner div. This is largely the "target", and what is returned.
+			$.maxLengthDisplay.setLengthDefinitionData($parent, $innerDiv);
 			$.maxLengthDisplay.updateDisplayMarkup($parent, $innerDiv);
 			$innerDiv
 				.addClass('maxlength-display-target');
@@ -348,6 +328,38 @@
 			}
 
 			return $innerDiv;
+		},
+		
+		"setLengthDefinitionData": function($parent, $target) {
+			var lengthClasses = {},
+				lengthClass,
+				overrideClasses,
+				className,
+				lengthVal;
+			
+			// Method to clone object that is supported in older browsers.
+			for (lengthClass in $.maxLengthDisplay.lengthDefinition) {
+				lengthClasses[lengthClass] = $.maxLengthDisplay.lengthDefinition[lengthClass];
+			}
+			
+			// Allow overrides of lengthClasses and definitions
+			if ($parent.data('maxlength-length-classes')) {
+				overrideClasses = $.maxLengthDisplay.objectifyCssString($parent.data('maxlength-length-classes'));
+				
+				for (className in overrideClasses) {
+					lengthVal = parseInt(overrideClasses[className]);
+					if (typeof lengthVal == "undefined" || typeof lengthVal == "NaN") {
+						if (typeof console != "undefined") {
+							console.warn('[jQuery Maxlength Display] - Override length class "'+className+'" value "'+overrideClasses[className]+'" could not be parsed as an integer. Ignoring');
+						}
+						continue;
+					}
+					lengthClasses[className] = lengthVal;
+				}
+			}
+			
+			$target.data('maxlength-length-classes', lengthClasses);
+			return true;
 		},
 		
 		"updateDisplayLocation": function($parent, $target) {
