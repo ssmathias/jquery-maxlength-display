@@ -91,13 +91,9 @@
 			}
 			
 			lengthClasses = $target.data('maxlength-length-classes');
-				
-			// Clean off old length classes.
-			if ($target.attr('class')) {
-				$target.attr('class', $target.attr('class').replace(/\s?maxlength-remaining-[\S]*\s?/g, ''));
-			}
 			
 			for (var lengthName in lengthClasses) {
+				$target.removeClass('maxlength-remaining-' + lengthName);
 				var currentLength = lengthClasses[lengthName];
 				if (remainingChars >= currentLength && currentLength > currentMaxClassNum) {
 					cssClass = "maxlength-remaining-" + lengthName;
