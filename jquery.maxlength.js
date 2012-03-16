@@ -136,7 +136,7 @@
 			}
 			else {
 				$target = $("#"+$element.data("maxlength-display-target"));
-				$this
+				$element
 					.focus(function() {
 						$target.addClass('maxlength-parent-has-focus');
 					})
@@ -144,6 +144,7 @@
 						$target.removeClass('maxlength-parent-has-focus');
 					});
 				$.maxLengthDisplay.setLengthDefinitionData($element, $target);
+				$.maxLengthDisplay.updateDisplayMarkup($element, $target);
 			}
 			
 			// Set up the change events for this element.
@@ -312,6 +313,7 @@
 					$parentDiv
 						.addClass("maxlength-parent-has-focus")
 						.show();
+					$.maxLengthDisplay.updateDisplayLocation($parent, $parentDiv);
 				})
 				.blur(function() {
 					$innerDiv
