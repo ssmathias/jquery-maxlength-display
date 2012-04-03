@@ -1,7 +1,7 @@
 ;
 /**
  * jQuery MaxLength Plugin
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Steven Mathias
  * Description:
  * 	This plugin will create a pop-up notification of how many characters
@@ -23,6 +23,7 @@
 
 	var MaxLengthDisplay = function(params, $scope) {
 		var settings = {
+			"displayTarget": null,
 			"targetPin": "top-left",
 			"parentPin": "top-right",
 			"allowPositionToggle": true,
@@ -51,6 +52,9 @@
 				/*if (typeof params.lengths == "String")
 					params.lengths = this.objectifyCssString(params.lengths);*/
 				settings.lengths = params.lengths;
+			}
+			if (params.displayTarget) {
+				settings.displayTarget = $(params.displayTarget);
 			}
 		}
 		for (var setting in settings) {
@@ -101,12 +105,13 @@
 		}
 		$element.data("maxlength-display-initialized", "true");
 		
-		if (!$element.data("maxlength-display-target")) {
-			// A display target needs to be created for this element.
-			$target = self.createDisplayTarget($element);
-		}
-		else {
+		$target = self.displayTarget;
+		
+		if ($element.data("maxlength-display-target")) {
 			$target = $("#"+$element.data("maxlength-display-target"));
+		}
+		
+		if ($target && $target.length > 0) {
 			$element
 				.focus(function() {
 					$target.addClass('maxlength-parent-has-focus');
@@ -116,6 +121,10 @@
 				});
 			self.setLengthDefinitionData($element, $target);
 			self.updateDisplayMarkup($element, $target);
+		}
+		else {
+			// A display target needs to be created for this element.
+			$target = self.createDisplayTarget($element);
 		}
 		
 		// Set up the change events for this element.
