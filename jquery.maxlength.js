@@ -31,7 +31,7 @@
 			"lengths": {
 				"long": 100,
 				"medium": 50,
-				"short": 1,
+				"short": 20,
 				"empty": 0
 			}
 		};
@@ -266,7 +266,7 @@
 		var self = this,
 			remainingChars = self.calculateRemainingChars($parent),
 			cssClass = "",
-			currentMaxClassNum = -1,
+			currentMaxClassNum = null,
 			lengthClasses;
 		
 		$target = $($target);
@@ -283,7 +283,7 @@
 		for (var lengthName in lengthClasses) {
 			$target.removeClass('maxlength-remaining-' + lengthName);
 			var currentLength = lengthClasses[lengthName];
-			if (remainingChars >= currentLength && currentLength > currentMaxClassNum) {
+			if (remainingChars <= currentLength && (currentLength < currentMaxClassNum || currentMaxClassNum == null)) {
 				cssClass = "maxlength-remaining-" + lengthName;
 				currentMaxClassNum = currentLength;
 			}
