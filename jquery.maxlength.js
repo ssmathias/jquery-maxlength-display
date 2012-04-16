@@ -1,7 +1,7 @@
 ;
 /**
  * jQuery MaxLength Plugin
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Steven Mathias
  * Description:
  * 	This plugin will create a pop-up notification of how many characters
@@ -31,7 +31,7 @@
 			"lengths": {
 				"long": 100,
 				"medium": 50,
-				"short": 1,
+				"short": 20,
 				"empty": 0
 			}
 		};
@@ -131,15 +131,6 @@
 		$element
 			.bind('keyup change', function() {
 				self.updateDisplayMarkup($element, $target);
-			})
-			.bind('keypress', function(e) {
-				var currentLength = $element.val().length;
-				if (currentLength + 1 > maxLength) {
-					// Prevent entry of the content
-					$element.val($element.val().substring(0, maxLength));
-					e.stopPropagation();
-					e.preventDefault();
-				}
 			});
 			
 		return true;
@@ -251,6 +242,7 @@
 				return false;
 			}
 			if (maxLength <= currentLength) {
+				$parent.val($parent.val().substring(0, maxLength));
 				return 0;
 			}
 			else {
@@ -266,7 +258,7 @@
 		var self = this,
 			remainingChars = self.calculateRemainingChars($parent),
 			cssClass = "",
-			currentMaxClassNum = -1,
+			currentMaxClassNum = null,
 			lengthClasses;
 		
 		$target = $($target);
@@ -283,7 +275,7 @@
 		for (var lengthName in lengthClasses) {
 			$target.removeClass('maxlength-remaining-' + lengthName);
 			var currentLength = lengthClasses[lengthName];
-			if (remainingChars >= currentLength && currentLength > currentMaxClassNum) {
+			if (remainingChars <= currentLength && (currentLength < currentMaxClassNum || currentMaxClassNum == null)) {
 				cssClass = "maxlength-remaining-" + lengthName;
 				currentMaxClassNum = currentLength;
 			}
