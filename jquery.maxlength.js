@@ -131,15 +131,6 @@
 		$element
 			.bind('keyup change', function() {
 				self.updateDisplayMarkup($element, $target);
-			})
-			.bind('keypress', function(e) {
-				var currentLength = $element.val().length;
-				if (currentLength + 1 > maxLength) {
-					// Prevent entry of the content
-					$element.val($element.val().substring(0, maxLength));
-					e.stopPropagation();
-					e.preventDefault();
-				}
 			});
 			
 		return true;
@@ -251,6 +242,7 @@
 				return false;
 			}
 			if (maxLength <= currentLength) {
+				$parent.val($parent.val().substring(0, maxLength));
 				return 0;
 			}
 			else {
